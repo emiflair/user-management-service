@@ -69,7 +69,6 @@ userSchema.virtual('fullName').get(function() {
 });
 
 // Index for performance
-userSchema.index({ email: 1 });
 userSchema.index({ createdAt: -1 });
 
 // Encrypt password using bcrypt
