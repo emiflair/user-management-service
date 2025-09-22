@@ -1,0 +1,152 @@
+# Docker Compose Configuration for User Management Service
+#
+# This file defines a multi-service application consisting of:
+# - Node.js User Management Service
+# - MongoDB Database
+# - Persistent data storage
+# - Network isolation
+#
+# Features:
+# - Service dependencies and startup order
+# - Named volumes for data persistence
+# - Environment variable configuration
+# - Health checks for service monitoring
+# - Network isolation for security
+# - Development and production ready
+
+version: '3.8'
+
+# Define services that make up the application
+services:
+  # Node.js User Management Service
+  user-service:
+    # Build configuration for the Node.js application
+    build:
+      context: .                    # Build context (current directory)
+      dockerfile: Dockerfile        # Dockerfile to use for building
+    
+    # Container and image naming
+    container_name: user-management-service
+    image: user-management-service:latest
+    
+    # Port mapping: host:container
+    # Maps port 5000 on host to port 5000 in container
+    ports:
+      - "5000:5000"
+    
+    # Environment variables for the Node.js application
+    environment:
+      # MongoDB connection string pointing to the mongo service
+      MONGO_URI: mongodb://mongo:27017/user-service
+      
+      # JWT configuration
+      JWT_SECRET: your_super_secure_jwt_secret_key_here
+      JWT_EXPIRES_IN: 1h
+      
+      # Server configuration
+      NODE_ENV: production
+      PORT: 5000
+      
+      # CORS configuration
+      CORS_ORIGIN: "*"
+      
+      # Rate limiting
+      RATE_LIMIT_WINDOW_MS: 900000    # 15 minutes
+      RATE_LIMIT_MAX: 100             # 100 requests per window
+      
+      # Security
+      BCRYPT_SALT_ROUNDS: 12          # Higher for production
+    
+    # Service dependencies
+    depends_on:
+      mongo:
+        condition: service_healthy    # Wait for MongoDB to be healthy
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Networks
+    networks:
+      - app-network
+    
+    # Volume mounts for logs persistence
+    volumes:
+      - app-logs:/usr/src/app/logs
+    
+    # Health check for the service
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # MongoDB Database Service
+  mongo:
+    # Use official MongoDB image
+    image: mongo:7.0-jammy           # MongoDB 7.0 LTS
+    
+    # Container naming
+    container_name: user-service-mongodb
+    
+    # Port mapping (optional - for external access)
+    # Comment out in production for security
+    ports:
+      - "27017:27017"
+    
+    # Environment variables for MongoDB
+    environment:
+      # Database initialization
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: your_secure_mongo_password
+      MONGO_INITDB_DATABASE: user-service
+    
+    # Persistent data storage
+    volumes:
+      - mongo-data:/data/db           # Database data
+      - mongo-config:/data/configdb   # Configuration data
+      # Optional: Custom initialization scripts
+      # - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Networks
+    networks:
+      - app-network
+    
+    # Health check for MongoDB
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits (optional - adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+# Named volumes for data persistence
+volumes:
+  mongo-data:
+    driver: local
+    name: user-service-mongo-data
+  
+  mongo-config:
+    driver: local
+    name: user-service-mongo-config
+  
+  app-logs:
+    driver: local
+    name: user-service-logs
+
+# Custom network for service isolation
+networks:
+  app-network:
+    driver: bridge
+    name: user-service-network
