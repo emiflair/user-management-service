@@ -1,0 +1,35 @@
+{
+    "name": "user-management-service",
+    "version": "1.0.0",
+    "description": "Node.js + Express + MongoDB service for user management with auth and RBAC.",
+    "main": "src/app.js",
+    "type": "commonjs",
+    "scripts": {
+      "start": "node src/app.js",
+      "dev": "nodemon src/app.js",
+      "test": "jest --runInBand --detectOpenHandles"
+    },
+    "keywords": ["node", "express", "mongodb", "user", "auth", "api"],
+    "license": "MIT",
+    "dependencies": {
+      "bcrypt": "^5.1.1",
+      "celebrate": "^15.0.3",
+      "cors": "^2.8.5",
+      "dotenv": "^16.4.5",
+      "express": "^4.19.2",
+      "express-mongo-sanitize": "^2.2.0",
+      "express-rate-limit": "^7.2.0",
+      "helmet": "^7.1.0",
+      "joi": "^17.13.3",
+      "jsonwebtoken": "^9.0.2",
+      "mongoose": "^8.5.2",
+      "morgan": "^1.10.0",
+      "winston": "^3.13.0"
+    },
+    "devDependencies": {
+      "jest": "^29.7.0",
+      "nodemon": "^3.1.4",
+      "supertest": "^6.3.4"
+    }
+  }
+  
