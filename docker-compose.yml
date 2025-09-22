@@ -14,8 +14,6 @@
 # - Network isolation for security
 # - Development and production ready
 
-version: '3.8'
-
 # Define services that make up the application
 services:
   # Node.js User Management Service
@@ -30,9 +28,9 @@ services:
     image: user-management-service:latest
     
     # Port mapping: host:container
-    # Maps port 5000 on host to port 5000 in container
+    # Maps port 3000 on host to port 5000 in container
     ports:
-      - "5000:5000"
+      - "3000:5000"
     
     # Environment variables for the Node.js application
     environment:

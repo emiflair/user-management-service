@@ -39,7 +39,7 @@ COPY package*.json ./
 # --only=production: Install only production dependencies
 # --no-audit: Skip vulnerability audit for faster build
 # --no-fund: Skip funding messages
-RUN npm ci --only=production --no-audit --no-fund && npm cache clean --force
+RUN npm install --only=production --no-audit --no-fund && npm cache clean --force
 
 # Stage 2: Production Image
 FROM node:18-alpine AS production
